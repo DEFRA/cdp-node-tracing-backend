@@ -1,7 +1,7 @@
 import {
-  exampleFindOneController,
-  exampleFindAllController
-} from '~/src/api/example/controllers/index.js'
+  trace,
+  traceEnd
+} from '~/src/api/example/controllers/example-find-all.js'
 
 /**
  * @satisfies {ServerRegisterPluginObject<void>}
@@ -13,13 +13,13 @@ const example = {
       server.route([
         {
           method: 'GET',
-          path: '/example',
-          ...exampleFindAllController
+          path: '/trace',
+          ...trace
         },
         {
           method: 'GET',
-          path: '/example/{exampleId}',
-          ...exampleFindOneController
+          path: '/trace/end',
+          ...traceEnd
         }
       ])
     }

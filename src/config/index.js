@@ -24,7 +24,7 @@ const config = convict({
   port: {
     doc: 'The port to bind.',
     format: 'port',
-    default: 3001,
+    default: 3010,
     env: 'PORT'
   },
   serviceName: {
@@ -76,7 +76,7 @@ const config = convict({
       format: Array,
       default: isProduction
         ? ['req.headers.authorization', 'req.headers.cookie', 'res.headers']
-        : ['req', 'res', 'responseTime']
+        : []
     }
   },
   mongoUri: {
@@ -124,6 +124,12 @@ const config = convict({
       default: 'x-cdp-request-id',
       env: 'TRACING_HEADER'
     }
+  },
+  dotnetBackend: {
+    doc: 'URL for dotnet backend',
+    format: String,
+    default: 'http://localhost:5000',
+    env: 'DOTNET_BACKEND'
   }
 })
 
