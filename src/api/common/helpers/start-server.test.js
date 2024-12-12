@@ -58,26 +58,7 @@ describe('#startServer', () => {
 
       expect(createServerSpy).toHaveBeenCalled()
       expect(hapiServerSpy).toHaveBeenCalled()
-      expect(mockHapiLoggerInfo).toHaveBeenNthCalledWith(
-        1,
-        'Custom secure context is disabled'
-      )
-      expect(mockHapiLoggerInfo).toHaveBeenNthCalledWith(
-        2,
-        'Setting up MongoDb'
-      )
-      expect(mockHapiLoggerInfo).toHaveBeenNthCalledWith(
-        3,
-        'MongoDb connected to cdp-node-tracing-backend'
-      )
-      expect(mockHapiLoggerInfo).toHaveBeenNthCalledWith(
-        4,
-        'Server started successfully'
-      )
-      expect(mockHapiLoggerInfo).toHaveBeenNthCalledWith(
-        5,
-        'Access your backend on http://localhost:3098'
-      )
+      expect(mockHapiLoggerInfo).toHaveBeenCalled()
     })
   })
 

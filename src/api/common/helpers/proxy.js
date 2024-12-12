@@ -1,9 +1,8 @@
 import { URL } from 'node:url'
-import { ProxyAgent } from 'undici'
+import { ProxyAgent, setGlobalDispatcher } from 'undici'
 import { HttpsProxyAgent } from 'https-proxy-agent'
-
-import { config } from '~/src/config/index.js'
 import { createLogger } from '~/src/api/common/helpers/logging/logger.js'
+import { bootstrap } from 'global-agent'
 
 const logger = createLogger()
 /**
@@ -19,17 +18,14 @@ const logger = createLogger()
  * @returns {Proxy|null}
  */
 function provideProxy() {
-  const proxyUrl = config.get('httpsProxy') ?? config.get('httpProxy')
+  const proxyUrl = process.env.HTTP_PROXY
 
   if (!proxyUrl) {
     return null
   }
 
   const url = new URL(proxyUrl)
-  const httpPort = 80
-  const httpsPort = 443
-  // The url.protocol value always has a colon at the end
-  const port = url.protocol.toLowerCase() === 'http:' ? httpPort : httpsPort
+  const port = url.port ?? 80
 
   logger.debug(`Proxy set up using ${url.origin}:${port}`)
 
@@ -45,27 +41,28 @@ function provideProxy() {
   }
 }
 
-/**
- * Provide fetch with dispatcher ProxyAgent when http/s proxy url config has been set
- * @param {string | URL } url
- * @param {RequestInit} options
- * @returns {Promise}
- */
-function proxyFetch(url, options) {
-  const proxy = provideProxy()
+const proxy = {
+  plugin: {
+    name: 'proxy',
+    version: '1.0.0',
+    register: function (server) {
+      if (process.env.HTTP_PROXY) {
+        server.logger.info('setting up proxy')
+        const uri = process.env.HTTP_PROXY
+        // setup unidici global proxy
+        setGlobalDispatcher(new ProxyAgent({ uri }))
 
-  if (!proxy) {
-    return fetch(url, options)
-  }
+        // setup global-proxy-agent
+        bootstrap()
+        global.GLOBAL_AGENT.HTTP_PROXY = uri
 
-  logger.debug(
-    `Fetching: ${url.toString()} via the proxy: ${proxy?.url.origin}:${proxy.port}`
-  )
-
-  return fetch(url, {
-    ...options,
-    dispatcher: proxy.proxyAgent
-  })
+        // setup and other non-standard http clients
+      } else {
+        server.logger.info('No proxy configured')
+      }
+    }
+  },
+  options: {}
 }
 
-export { proxyFetch, provideProxy }
+export { provideProxy, proxy }
